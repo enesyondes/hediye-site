@@ -314,7 +314,7 @@ Bende diyorum ki:
     window.addEventListener('scroll', () => {
         poems.forEach(poem => {
             const rect = poem.getBoundingClientRect();
-            if(rect.top < window.innerHeight - 100) {
+            if (rect.top < window.innerHeight - 100) {
                 poem.classList.add('visible');
             }
         });
@@ -325,11 +325,12 @@ Bende diyorum ki:
     const ctx = canvas.getContext("2d");
 
     let birdY = 200;
-    let gravity = 1.5;
-    let lift = -20;
+    let gravity = 0.6; // Daha yumuşak düşüş
+    let lift = -8; // Zıplama kuvveti
     let velocity = 0;
     let pipes = [];
     let score = 0;
+
     const birdImg = new Image();
     birdImg.src = "https://i.imgur.com/3JWVwwD.jpeg";
 
@@ -357,16 +358,19 @@ Bende diyorum ki:
         velocity += gravity;
         birdY += velocity;
 
-        if(birdY > canvas.height - 50) {
+        // Alt sınır
+        if (birdY > canvas.height - 50) {
             birdY = canvas.height - 50;
             velocity = 0;
         }
+        // Üst sınır
+        if (birdY < 0) birdY = 0;
 
         drawBird();
 
-        // Pipes logic
-        if(pipes.length === 0 || pipes[pipes.length - 1].x < 200) {
-            const gap = 120;
+        // Pipe ekleme
+        if (pipes.length === 0 || pipes[pipes.length - 1].x < 200) {
+            const gap = 150; // Daha geniş boşluk
             const topHeight = Math.random() * (canvas.height - gap - 100) + 50;
             pipes.push({
                 x: canvas.width,
@@ -376,14 +380,19 @@ Bende diyorum ki:
         }
 
         pipes.forEach(pipe => {
-            pipe.x -= 2;
-            if(pipe.x + 50 < 0) {
+            pipe.x -= 2; // Daha yavaş hareket
+
+            // Pipe ekran dışına çıkarsa
+            if (pipe.x + 50 < 0) {
                 pipes.shift();
                 score++;
             }
 
-            if(50 < pipe.x + 50 && 50 + 50 > pipe.x &&
-               (birdY < pipe.top || birdY + 50 > pipe.bottom)) {
+            // Çarpışma kontrolü
+            if (
+                50 < pipe.x + 50 && 50 + 50 > pipe.x &&
+                (birdY < pipe.top || birdY + 50 > pipe.bottom)
+            ) {
                 resetGame();
             }
         });
@@ -406,13 +415,14 @@ Bende diyorum ki:
     }
 
     document.addEventListener("keydown", e => {
-        if(e.code === "Space") flap();
+        if (e.code === "Space") flap();
     });
 
     canvas.addEventListener("click", flap);
 
     update();
 </script>
+
 
 </body>
 </html>
