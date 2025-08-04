@@ -4,13 +4,13 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Prenses Zeynep</title>
-<link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Dancing+Script:wght@600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Roboto:wght@400;500&display=swap" rel="stylesheet">
 <style>
     body, html {
         margin: 0;
         padding: 0;
         scroll-behavior: smooth;
-        font-family: 'Dancing Script', cursive;
+        font-family: 'Roboto', sans-serif;
     }
 
     /* Landing Section */
@@ -73,23 +73,12 @@
         border-radius: 50%;
     }
 
-    .heart::before {
-        top: -10px;
-        left: 0;
-    }
-
-    .heart::after {
-        left: 10px;
-        top: 0;
-    }
+    .heart::before { top: -10px; left: 0; }
+    .heart::after { left: 10px; top: 0; }
 
     @keyframes float {
-        0% {
-            transform: translateY(100vh) rotate(45deg);
-        }
-        100% {
-            transform: translateY(-10vh) rotate(45deg);
-        }
+        0% { transform: translateY(100vh) rotate(45deg); }
+        100% { transform: translateY(-10vh) rotate(45deg); }
     }
 
     /* Poems Section */
@@ -120,7 +109,6 @@
     .poem-text {
         flex: 1;
         padding: 20px;
-        font-size: 1.4rem;
     }
 
     .poem-text h2 {
@@ -132,6 +120,8 @@
     .poem-text p {
         white-space: pre-line;
         line-height: 1.6;
+        font-size: 1.1rem;
+        color: #333;
     }
 
     .poem-img {
@@ -165,6 +155,26 @@
         border: 5px solid #fff;
     }
 
+    /* Game Section */
+    .game-section {
+        text-align: center;
+        padding: 50px 20px;
+        background: #fff0f5;
+    }
+
+    .game-section h2 {
+        font-family: 'Pacifico', cursive;
+        font-size: 2.5rem;
+        color: #ff4081;
+        margin-bottom: 20px;
+    }
+
+    #gameCanvas {
+        background: #ffe6f2;
+        border: 2px solid #ff4081;
+        border-radius: 10px;
+    }
+
     /* Responsive */
     @media (max-width: 768px) {
         .poem {
@@ -195,7 +205,7 @@
 
 <!-- Poems -->
 <section class="poems" id="poems">
-    <!-- Poem 1 -->
+    <!-- Poem Blocks -->
     <div class="poem">
         <div class="poem-text">
             <h2>21 Şiiri</h2>
@@ -222,7 +232,6 @@ Gelemem artık git ihtiyar ben 21 de onu buldum</p>
         </div>
     </div>
 
-    <!-- Poem 2 -->
     <div class="poem">
         <div class="poem-text">
             <h2>Aşk ile Aşık</h2>
@@ -241,7 +250,6 @@ Sevda denir canan benim artık</p>
         </div>
     </div>
 
-    <!-- Poem 3 -->
     <div class="poem">
         <div class="poem-text">
             <h2>Uzaklar</h2>
@@ -263,7 +271,6 @@ Eğilmeyen başları kopsun yok bir cellat ki o başları sur etsin</p>
         </div>
     </div>
 
-    <!-- Poem 4 -->
     <div class="poem">
         <div class="poem-text">
             <h2>Bahanem</h2>
@@ -294,6 +301,13 @@ Bende diyorum ki:
     <img src="https://i.imgur.com/3JWVwwD.jpeg" alt="Bizim Fotoğrafımız">
 </section>
 
+<!-- Game Section -->
+<section class="game-section">
+    <h2>Biraz Eğlenelim 🎮</h2>
+    <canvas id="gameCanvas" width="400" height="500"></canvas>
+    <p>Bilgisayarda boşluk tuşu, mobilde ekrana dokun!</p>
+</section>
+
 <script>
     // Scroll animation
     const poems = document.querySelectorAll('.poem');
@@ -305,6 +319,99 @@ Bende diyorum ki:
             }
         });
     });
+
+    // Game logic
+    const canvas = document.getElementById("gameCanvas");
+    const ctx = canvas.getContext("2d");
+
+    let birdY = 200;
+    let gravity = 1.5;
+    let lift = -20;
+    let velocity = 0;
+    let pipes = [];
+    let score = 0;
+    const birdImg = new Image();
+    birdImg.src = "https://i.imgur.com/3JWVwwD.jpeg";
+
+    function drawBird() {
+        ctx.drawImage(birdImg, 50, birdY, 50, 50);
+    }
+
+    function drawPipes() {
+        pipes.forEach(pipe => {
+            ctx.fillStyle = "#ff80ab";
+            ctx.fillRect(pipe.x, 0, 50, pipe.top);
+            ctx.fillRect(pipe.x, pipe.bottom, 50, canvas.height - pipe.bottom);
+        });
+    }
+
+    function drawScore() {
+        ctx.fillStyle = "#ff4081";
+        ctx.font = "24px Roboto";
+        ctx.fillText("Skor: " + score, 10, 30);
+    }
+
+    function update() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        velocity += gravity;
+        birdY += velocity;
+
+        if(birdY > canvas.height - 50) {
+            birdY = canvas.height - 50;
+            velocity = 0;
+        }
+
+        drawBird();
+
+        // Pipes logic
+        if(pipes.length === 0 || pipes[pipes.length - 1].x < 200) {
+            const gap = 120;
+            const topHeight = Math.random() * (canvas.height - gap - 100) + 50;
+            pipes.push({
+                x: canvas.width,
+                top: topHeight,
+                bottom: topHeight + gap
+            });
+        }
+
+        pipes.forEach(pipe => {
+            pipe.x -= 2;
+            if(pipe.x + 50 < 0) {
+                pipes.shift();
+                score++;
+            }
+
+            if(50 < pipe.x + 50 && 50 + 50 > pipe.x &&
+               (birdY < pipe.top || birdY + 50 > pipe.bottom)) {
+                resetGame();
+            }
+        });
+
+        drawPipes();
+        drawScore();
+
+        requestAnimationFrame(update);
+    }
+
+    function flap() {
+        velocity = lift;
+    }
+
+    function resetGame() {
+        birdY = 200;
+        velocity = 0;
+        pipes = [];
+        score = 0;
+    }
+
+    document.addEventListener("keydown", e => {
+        if(e.code === "Space") flap();
+    });
+
+    canvas.addEventListener("click", flap);
+
+    update();
 </script>
 
 </body>
