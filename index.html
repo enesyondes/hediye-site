@@ -276,7 +276,7 @@ Bende diyorum ki:
     const targetImg = new Image();
     targetImg.src = "https://i.imgur.com/DKHf9UD.jpeg";
 
-    let player = { x: 50, y: 280, w: 50, h: 50, dy: 0, gravity: 0.4, jump: -8, grounded: false };
+    let player = { x: 50, y: 280, w: 50, h: 50, dy: 0, gravity: 0.35, jump: -10, grounded: false };
     let obstacles = [];
     let score = 0;
     let gameOver = false;
@@ -324,13 +324,13 @@ Bende diyorum ki:
         }
 
         // Hedef animasyonu
-        targetX += targetDir * 0.5; // daha yavaş
+        targetX += targetDir * 0.4; // Daha da yavaş
         if(targetX > canvas.width - 70 || targetX < canvas.width - 150) targetDir *= -1;
 
         // Engeller
-        obstacles.forEach(ob => { ob.x -= 2; }); // daha yavaş
+        obstacles.forEach(ob => { ob.x -= 1.5; }); // Daha yavaş
 
-        if(obstacles.length === 0 || obstacles[obstacles.length - 1].x < 300) {
+        if(obstacles.length === 0 || obstacles[obstacles.length - 1].x < 320) {
             obstacles.push({ x: canvas.width, y: canvas.height - 40, w: 30, h: 20 });
         }
 
@@ -344,7 +344,7 @@ Bende diyorum ki:
         });
 
         // Skor
-        score += 0.07; // daha yavaş ilerle
+        score += 0.05; // Yavaş ilerle
         if(score >= 100) {
             ctx.fillStyle = "#ff4081";
             ctx.font = "30px Roboto";
@@ -393,7 +393,5 @@ Bende diyorum ki:
 
     update();
 </script>
-
-
 </body>
 </html>
