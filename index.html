@@ -261,7 +261,7 @@ Bende diyorum ki:
 <!-- Game Section -->
 <section class="game-section">
     <h2>Zeynep’i Yakala 🎮</h2>
-    <canvas id="gameCanvas" width="600" height="300"></canvas>
+    <canvas id="gameCanvas" width="800" height="350"></canvas>
     <button class="retry-btn" onclick="resetGame()">Tekrar Dene</button>
     <p>Boşluk tuşu veya ekrana dokunarak zıpla</p>
 </section>
@@ -276,13 +276,16 @@ Bende diyorum ki:
     const targetImg = new Image();
     targetImg.src = "https://i.imgur.com/DKHf9UD.jpeg";
 
-    let player = { x: 50, y: 280, w: 50, h: 50, dy: 0, gravity: 0.35, jump: -10, grounded: false };
-    let obstacles = [];
-    let score = 0;
+    let player = { x: 50, y: 280, w: 50, h: 50, dy: 0, gravity: 0.3, jump: -8, speed: 3, grounded: false };
+    let obstacles = [
+        { x: 300, y: 300, w: 30, h: 20 },
+        { x: 500, y: 280, w: 30, h: 40 },
+        { x: 650, y: 300, w: 30, h: 20 }
+    ];
     let gameOver = false;
+    let progress = 0; // ilerleme yüzdesi
     let targetX = canvas.width - 80;
     let targetY = 20;
-    let targetDir = 1;
 
     function drawPlayer() {
         ctx.drawImage(playerImg, player.x, player.y, player.w, player.h);
@@ -305,66 +308,59 @@ Bende diyorum ki:
     function drawScore() {
         ctx.fillStyle = "#ff4081";
         ctx.font = "20px Roboto";
-        ctx.fillText("Zeynep’e Yaklaşma: " + Math.floor(score) + "%", 10, 25);
+        ctx.fillText("İlerleme: " + Math.floor(progress) + "%", 10, 25);
     }
 
     function update() {
-        if(gameOver) return;
+        if (gameOver) return;
 
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-        // Player hareket
+        // Player hareketi
+        player.x += player.speed;
         player.y += player.dy;
         player.dy += player.gravity;
 
-        if(player.y + player.h >= canvas.height - 20) {
+        if (player.y + player.h >= canvas.height - 20) {
             player.y = canvas.height - 20 - player.h;
             player.dy = 0;
             player.grounded = true;
         }
 
-        // Hedef animasyonu
-        targetX += targetDir * 0.4; // Daha da yavaş
-        if(targetX > canvas.width - 70 || targetX < canvas.width - 150) targetDir *= -1;
-
-        // Engeller
-        obstacles.forEach(ob => { ob.x -= 1.5; }); // Daha yavaş
-
-        if(obstacles.length === 0 || obstacles[obstacles.length - 1].x < 320) {
-            obstacles.push({ x: canvas.width, y: canvas.height - 40, w: 30, h: 20 });
-        }
-
-        obstacles = obstacles.filter(ob => ob.x + ob.w > 0);
-
         // Çarpışma kontrolü
         obstacles.forEach(ob => {
-            if(player.x < ob.x + ob.w && player.x + player.w > ob.x && player.y + player.h > ob.y) {
+            if (
+                player.x < ob.x + ob.w &&
+                player.x + player.w > ob.x &&
+                player.y + player.h > ob.y
+            ) {
                 endGame();
             }
         });
 
-        // Skor
-        score += 0.05; // Yavaş ilerle
-        if(score >= 100) {
+        // İlerleme
+        progress = (player.x / (canvas.width - 50)) * 100;
+
+        if (progress >= 100) {
             ctx.fillStyle = "#ff4081";
             ctx.font = "30px Roboto";
-            ctx.fillText("Tebrikler! Zeynep'i Yakaladın ❤️", 80, canvas.height / 2);
+            ctx.fillText("Tebrikler! Zeynep'i Yakaladın ❤️", 200, canvas.height / 2);
             gameOver = true;
             document.querySelector('.retry-btn').style.display = 'block';
             return;
         }
 
         drawGround();
+        drawObstacles();
         drawPlayer();
         drawTarget();
-        drawObstacles();
         drawScore();
 
         requestAnimationFrame(update);
     }
 
     function jump() {
-        if(player.grounded) {
+        if (player.grounded) {
             player.dy = player.jump;
             player.grounded = false;
         }
@@ -374,21 +370,21 @@ Bende diyorum ki:
         gameOver = true;
         ctx.fillStyle = "#ff4081";
         ctx.font = "30px Roboto";
-        ctx.fillText("Kaybettin! Tekrar dene 💔", 150, canvas.height / 2);
+        ctx.fillText("Kaybettin! Tekrar dene 💔", 250, canvas.height / 2);
         document.querySelector('.retry-btn').style.display = 'block';
     }
 
     function resetGame() {
+        player.x = 50;
         player.y = 280;
         player.dy = 0;
-        obstacles = [];
-        score = 0;
+        progress = 0;
         gameOver = false;
         document.querySelector('.retry-btn').style.display = 'none';
         update();
     }
 
-    document.addEventListener('keydown', e => { if(e.code === "Space") jump(); });
+    document.addEventListener('keydown', e => { if (e.code === "Space") jump(); });
     canvas.addEventListener('click', jump);
 
     update();
